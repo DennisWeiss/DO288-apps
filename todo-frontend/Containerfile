@@ -6,13 +6,17 @@ LABEL description="To Do List application builder"
 # ENV REACT_APP_API_HOST=http://localhost:3000
 ENV REACT_APP_API_HOST=""
 
-USER 0
+EXPOSE 8080
+
+USER 1001
 
 COPY . /tmp/todo-frontend
 
-RUN cd /tmp/todo-frontend
-RUN npm install
-RUN npm run build
+RUN chown -R 1001:0 /tmp/todo-frontend/ && \
+chmod -R 770 /tmp/todo-frontend/ && \
+cd /tmp/todo-frontend && \
+npm install && \
+npm run build
 
 # https://github.com/sclorg/nginx-container
 FROM registry.access.redhat.com/ubi8/nginx-118
@@ -26,3 +30,4 @@ COPY nginx.conf /etc/nginx/
 COPY --from=appbuild /tmp/todo-frontend/build /usr/share/nginx/html
 
 CMD nginx -g "daemon off;"
+
